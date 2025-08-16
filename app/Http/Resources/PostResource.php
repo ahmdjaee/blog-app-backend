@@ -17,10 +17,11 @@ class PostResource extends JsonResource
     public function toArray(Request $request): array
     {
         $date = Carbon::parse($this->published_at);
+
         return [
             'id' => $this->id,
             'title' => $this->title,
-            'thumbnail' =>url(Storage::url($this->thumbnail)),
+            'thumbnail' => url(Storage::url($this->thumbnail)),
             'content' => $this->content,
             'slug' => $this->slug,
             'category' => [
@@ -32,7 +33,11 @@ class PostResource extends JsonResource
                 'name' => $this->user->name,
             ],
             'published' => $this->published === 1 ? true : false,
-            'published_at' =>   $date->diffForHumans()
+            'published_at' => $date->diffForHumans(),
+            'likes' => $this->likes->count(),
+            'liked' => $this->liked(),
+            'comments' => $this->comments->count(),
+            'marked' => $this->isBookmark(),
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SummaryController extends Controller
@@ -12,8 +13,25 @@ class SummaryController extends Controller
      * Admin dashboard.
      */
 
+    public function totalViewsAdmin(): JsonResponse
+    {
 
+    }
 
+    public function totalPostsAdmin(): JsonResponse
+    {
+
+    }
+
+    public function totalUsersAdmin(): JsonResponse
+    {
+
+    }
+
+    public function totalCategoriesAdmin(): JsonResponse
+    {
+
+    }
 
 
     /**

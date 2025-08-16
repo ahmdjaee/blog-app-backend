@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureIsAdmin;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -52,11 +52,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/posts',  'store');
         Route::put('/posts/{id}',  'update');
         Route::delete('/posts/{id}',  'destroy');
+        Route::post('/posts/{id}/like',  'like');
     });
 
     Route::controller(AuthController::class)->group(function () {
         Route::delete('/auth/logout', 'logout');
         Route::get('/auth/me', 'me');
+    });
+
+    Route::controller(BookmarkController::class)->group(function () {
+        Route::get('/bookmarks', 'show');
+        Route::post('/bookmarks/toggle', 'toggle');
     });
 });
 

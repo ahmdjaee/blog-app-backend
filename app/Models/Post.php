@@ -5,11 +5,17 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $casts = [
+        'published_at' => 'datetime:Y-m-d',
+    ];
 
     protected $fillable = [
         'title',
@@ -19,6 +25,7 @@ class Post extends Model
         'published',
         'thumbnail',
         'user_id',
+        'published_at',
     ];
 
     public function setSlugAttribute($value)
@@ -48,5 +55,30 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function liked()
+    {
+        if (!auth('sanctum')->check()) {
+            return false;
+        }
+        return $this->likes()->where('user_id', auth('sanctum')->user()->id)->exists();
+    }
+
+    public function bookmarks(): HasOne
+    {
+        return $this->hasOne(Bookmark::class);
+    }
+
+    public function isBookmark(): bool
+    {
+        return Bookmark::query()->where('post_id', $this->id)
+            ->where('user_id', auth('sanctum')->user()->id)
+            ->exists();
     }
 }

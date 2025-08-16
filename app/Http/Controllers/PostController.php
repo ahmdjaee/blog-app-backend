@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
 use App\Http\Resources\PostResource;
+use App\Models\Comment;
 use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,7 @@ class PostController extends Controller
     public function store(PostRequest $request)
     {
         $data = $request->validated();
-        $request->validate(['thumbnail' => ['required',  'image', 'max:5024'],]);
+        $request->validate(['thumbnail' => ['required', 'image', 'max:5024'],]);
         $data['user_id'] = auth()->user()->id;
         $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
         $post = Post::create($data);
@@ -36,9 +37,9 @@ class PostController extends Controller
         $keyword = $request->query('keyword', '');
         $category = $request->query('category', '');
         $userId = $request->query('user_id', '');
-        $published = $request->query('published',);
+        $published = $request->query('published', );
 
-        $query = Post::query();
+        $query = Post::query()->with('comments');
 
         if (!empty($keyword)) {
             $query->where(function (Builder $q) use ($keyword, $category) {
@@ -70,10 +71,10 @@ class PostController extends Controller
             $query->where('published', $published);
         }
 
-        $posts = $query->orderBy('id', 'desc')
+        $posts = $query->with('comments')->orderBy('id', 'desc')
             ->paginate($limit, ['*'], 'page', $page)
             ->onEachSide(0)
-            ->withQueryString();;
+            ->withQueryString();
 
         return $this->paginationResponse(PostResource::collection($posts), 'Post get successfully');
     }
@@ -83,7 +84,7 @@ class PostController extends Controller
         $query = Post::query();
         $userId = $request->query('user_id', '');
 
-        if(!empty($userId)){
+        if (!empty($userId)) {
             $query->where('user_id', $userId);
         }
 
@@ -111,7 +112,7 @@ class PostController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             Storage::delete($post->thumbnail);
-            $request->validate(['thumbnail' => ['required',  'image', 'max:5024'],]);
+            $request->validate(['thumbnail' => ['required', 'image', 'max:5024'],]);
             $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
         }
 
@@ -131,6 +132,29 @@ class PostController extends Controller
         }
         $post->increment('view_count');
         return $this->successResponse(new PostResource($post), 'Post get successfully');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function like(int $id)
+    {
+        $post = Post::where('id', $id)->first();
+
+        if (!$post) {
+            return $this->errorResponse('Post not found', 404);
+        }
+
+        if ($post->likes()->where('user_id', auth()->user()->id)->exists()) {
+            $post->likes()->where('user_id', auth()->user()->id)->delete();
+            return $this->successResponse(true, 'Post unliked successfully');
+        }
+
+        $post->likes()->create([
+            'user_id' => auth()->user()->id
+        ]);
+
+        return $this->successResponse(true, 'Post liked successfully');
     }
 
     /**

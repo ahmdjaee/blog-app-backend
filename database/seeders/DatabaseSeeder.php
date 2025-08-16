@@ -36,6 +36,19 @@ class DatabaseSeeder extends Seeder
 
         $category =  Category::factory(count: 20)->create();
 
+        
+        for ($i = 0; $i < 100_000; $i++) {
+            Post::insert([
+                'title' => 'Best Practices for API Design',
+                'content' => '<p>APIs are the backbone of modern web apps. Follow these best practices to design efficient APIs.</p>',
+                'published' => true,
+                'category_id' => $category[$i % count($category)]->id,
+                'slug' => uniqid() . '-best-api-design-practices',
+                'user_id' => $user[$i % count($user)]->id,
+                'thumbnail' => 'thumbnails/image.png'
+            ]);
+        }
+
         Post::insert([
             [
                 'title' => 'How to Learn PHP Fast',

@@ -36,7 +36,7 @@ class CommentController extends Controller
         $comments = $query->orderBy('id', 'desc')
             ->paginate($limit, ['*'], 'page', $page)
             ->onEachSide(0)
-            ->withQueryString();;
+            ->withQueryString();
 
         return $this->paginationResponse(CommentResource::collection($comments), 'Comment get successfully');
     }

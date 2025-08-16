@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
             $table->boolean('published')->default(false);
-            $table->dateTime('published_at')->default(Carbon::now());
+            $table->dateTime('published_at')->useCurrent();
             $table->unsignedBigInteger('view_count')->default(0);
             $table->softDeletes();
             $table->timestamps();
