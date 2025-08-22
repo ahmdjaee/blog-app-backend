@@ -21,6 +21,7 @@ class PostResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'sub_title' => $this->sub_title,
             'thumbnail' => url(Storage::url($this->thumbnail)),
             'content' => $this->content,
             'slug' => $this->slug,
@@ -31,6 +32,7 @@ class PostResource extends JsonResource
             'author' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,
+                'avatar' => $this->user->avatar ? url(Storage::url($this->user->avatar)) : null,
             ],
             'published' => $this->published === 1 ? true : false,
             'published_at' => $date->diffForHumans(),

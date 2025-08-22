@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
 use App\Http\Resources\PostResource;
-use App\Models\Comment;
 use App\Models\Post;
-use Carbon\Carbon;
+use App\Models\PostView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -38,7 +37,6 @@ class PostController extends Controller
         $category = $request->query('category', '');
         $userId = $request->query('user_id', '');
         $published = $request->query('published', );
-
         $query = Post::query()->with('comments');
 
         if (!empty($keyword)) {
@@ -63,15 +61,11 @@ class PostController extends Controller
             $query->where('user_id', $userId);
         }
 
-        // info("Published query $published");
-
         if (isset($published)) {
-            info("Published query $published");
-
             $query->where('published', $published);
         }
 
-        $posts = $query->with('comments')->orderBy('id', 'desc')
+        $posts = $query->with(['comments', 'user'])->orderBy('id', 'desc')
             ->paginate($limit, ['*'], 'page', $page)
             ->onEachSide(0)
             ->withQueryString();
@@ -111,7 +105,9 @@ class PostController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            Storage::delete($post->thumbnail);
+            if ($post->thumbnail != 'thumbnails/image.png') {
+                Storage::disk('public')->delete("$post->thumbnail");
+            }
             $request->validate(['thumbnail' => ['required', 'image', 'max:5024'],]);
             $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
         }
@@ -130,7 +126,15 @@ class PostController extends Controller
         if (!$post) {
             return $this->errorResponse('Post not found', 404);
         }
-        $post->increment('view_count');
+
+        PostView::updateOrCreate([
+            'post_id' => $post->id,
+            'ip_address' => request()->ip(),
+        ]);
+
+        $post->loadCount('views');
+
+        // info("View COUNT - " . $post->views_count);
         return $this->successResponse(new PostResource($post), 'Post get successfully');
     }
 
@@ -162,9 +166,16 @@ class PostController extends Controller
      */
     public function destroy(int $id)
     {
-        $result = Post::destroy($id);
+        $result = Post::find($id);
         if (!$result) {
             return $this->errorResponse('Post not found', 404);
+        }
+        $result->delete();
+        if ($result->thumbnail) {
+            if ($result->thumbnail != 'thumbnails/image.png') {
+                Storage::disk('public')->delete($result->thumbnail);
+
+            }
         }
         return $this->successResponse(true, 'Post deleted successfully');
     }

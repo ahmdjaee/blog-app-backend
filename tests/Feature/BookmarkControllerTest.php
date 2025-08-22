@@ -14,6 +14,5 @@ class BookmarkControllerTest extends TestCase
      */
     public function it_can_store_a_bookmark_successfully(): void
     {
-        $user = User::factory()->
     }
 }

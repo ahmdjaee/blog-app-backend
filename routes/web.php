@@ -17,3 +17,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/framework-optimize', function () {
+    Artisan::call('optimize', );
+
+    info('Optimize done!');
+
+    return redirect('/');
+});
+
+Route::get('/framework-optimize-clear', function () {
+    Artisan::call('optimize:clear', );
+
+    info('Optimize clear done!');
+
+    return redirect('/');
+});

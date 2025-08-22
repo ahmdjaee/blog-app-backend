@@ -48,7 +48,9 @@ class SummaryController extends Controller
             $query->where('user_id', $userId);
         }
 
-        $post = $query->sum('view_count');
+        $post = $query->loadCount('views');
+
+        
 
         return $this->successResponse($post, 'Post get successfully');
     }

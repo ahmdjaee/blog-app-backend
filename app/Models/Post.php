@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +18,7 @@ class Post extends Model
 
     protected $fillable = [
         'title',
+        'sub_title',
         'slug',
         'category_id',
         'content',
@@ -77,8 +77,17 @@ class Post extends Model
 
     public function isBookmark(): bool
     {
+        if (!auth('sanctum')->check()) {
+            return false;
+        }
+
         return Bookmark::query()->where('post_id', $this->id)
             ->where('user_id', auth('sanctum')->user()->id)
             ->exists();
+    }
+
+    public function views(): HasMany
+    {
+        return $this->hasMany(PostView::class);
     }
 }
