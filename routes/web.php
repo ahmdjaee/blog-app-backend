@@ -33,3 +33,11 @@ Route::get('/framework-optimize-clear', function () {
 
     return redirect('/');
 });
+
+Route::get('/framework-storage-link', function () {
+    Artisan::call('storage:link', );
+
+    info('Optimize storage:link done!');
+
+    return redirect('/');
+});
