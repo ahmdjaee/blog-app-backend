@@ -24,7 +24,8 @@ class StatisticController extends Controller
                 DB::raw('COUNT(*) as total')
             )
             ->groupBy('day')
-            ->orderBy('day')
+            ->orderByRaw('MIN(post_views.created_at)') // supaya urut
+            // ->orderBy('day')
             ->get();
 
         return response()->json([
